@@ -264,28 +264,35 @@ export default function App() {
   };
 
   // Handle quiz completion
-  const handleFinish = (ans) => {
-    setAnswers(ans);
+  const handleFinish = (answers) => {
+    // Ensure answers is an array
+    if (!Array.isArray(answers)) {
+      console.error('Expected answers to be an array, got:', answers);
+      answers = [];
+    }
+    
+    setAnswers(answers);
     
     // Calculate score
-    const correctCount = questions.reduce((count, q, index) => {
-      return count + (q.correctAnswer === ans[index] ? 1 : 0);
+    const correctCount = questions.reduce((count, question, index) => {
+      return count + (question.correctAnswer === answers[index] ? 1 : 0);
     }, 0);
     
-    const score = Math.round((correctCount / questions.length) * 100);
+    const score = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
     
     // Update quiz in history as completed
-    const updatedHistory = quizHistory.map(q => {
-      if (q.questions === questions) {
+    const updatedHistory = quizHistory.map(quiz => {
+      // Find the matching quiz by comparing questions array references
+      if (quiz.questions === questions) {
         return {
-          ...q,
+          ...quiz,
           completed: true,
           score,
-          answers: ans,
+          answers: [...answers], // Create a new array to ensure reactivity
           completedAt: new Date().toISOString()
         };
       }
-      return q;
+      return quiz;
     });
     
     setQuizHistory(updatedHistory);
@@ -294,14 +301,7 @@ export default function App() {
     setStep('result');
   };
 
-  // Handle quiz restart
-  const handleRestart = () => {
-    setQuestions([]);
-    setAnswers([]);
-    setError('');
-    setStep('hero');
-    setProgress(0);
-  };
+ 
 
   // Handle view change (home/history)
   const handleViewChange = (view) => {
@@ -321,13 +321,13 @@ export default function App() {
       case 'loading':
         return <Loading progress={progress} />;
       case 'quiz':
-        return <Quiz questions={questions} onFinish={handleFinish} />;
+        return <Quiz questions={questions} onFinish={handleFinish} difficulty={difficulty} />;
       case 'result':
         return (
           <Result
             questions={questions}
             answers={answers}
-            onRestart={handleRestart}
+            difficulty={difficulty}
           />
         );
       case 'hero':

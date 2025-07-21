@@ -1,21 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import ConfirmDialog from "./ConfirmDialog";
 
-export default function Result({ questions, answers, onRestart }) {
-  const [showConfirm, setShowConfirm] = useState(false);
+export default function Result({ questions = [], answers = [], difficulty = 'Easy' }) {
   const [showDetails, setShowDetails] = useState(false);
   const [animateScore, setAnimateScore] = useState(false);
+  const [slideIn, setSlideIn] = useState(false);
+  const detailsRef = useRef(null);
 
-  const score = answers.filter(
-    (a, i) => a === questions[i].correctAnswer
-  ).length;
+  // Ensure answers is an array and has the same length as questions
+  const validAnswers = Array.isArray(answers) ? answers : [];
+  const score = questions.reduce((count, question, index) => {
+    return count + (validAnswers[index] === question.correctAnswer ? 1 : 0);
+  }, 0);
   
   const percentage = Math.round((score / questions.length) * 100);
   const passed = percentage >= 60; // 60% passing threshold
 
-  // Animate score on mount
+  // Animate score and slide-in on mount
   useEffect(() => {
     const timer = setTimeout(() => setAnimateScore(true), 500);
+    setTimeout(() => setSlideIn(true), 100); // slight delay for smoothness
     return () => clearTimeout(timer);
   }, []);
 
@@ -29,45 +33,42 @@ export default function Result({ questions, answers, onRestart }) {
 
   const performance = getPerformanceMessage();
 
-  const handleRestart = () => {
-    setShowConfirm(true);
-  };
-
-  const confirmRestart = () => {
-    setShowConfirm(false);
-    onRestart();
-  };
-
-  const downloadResults = () => {
-    const results = {
-      score: `${score}/${questions.length}`,
-      percentage: `${percentage}%`,
-      passed: passed,
-      date: new Date().toLocaleDateString(),
-      questions: questions.map((q, i) => ({
-        question: q.question,
-        yourAnswer: q.options[answers[i]] || 'Not answered',
-        correctAnswer: q.options[q.correctAnswer],
-        isCorrect: answers[i] === q.correctAnswer
-      }))
-    };
+  const toggleDetails = useCallback(() => {
+    const newShowDetails = !showDetails;
+    setShowDetails(newShowDetails);
     
-    const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `quiz-results-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+    if (newShowDetails) {
+      // Wait for the next render to ensure the details section is in the DOM
+      setTimeout(() => {
+        if (detailsRef.current) {
+          detailsRef.current.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }, 100);
+    }
+  }, [showDetails]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Main Results Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-6 text-center border border-gray-100">
+        <div className={`bg-white rounded-2xl shadow-xl p-8 mb-6 text-center border border-gray-100 transition-all duration-700 ease-out transform ${slideIn ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0'}`}>
+          {/* Header with difficulty */}
+          <div className="flex items-center justify-center mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Quiz Results
+              <span className={`ml-3 px-3 py-1 rounded-full text-xs font-medium align-middle ${
+                difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>
+                {difficulty}
+              </span>
+            </h1>
+          </div>
+
           {/* Celebration Icon */}
           <div className="w-20 h-20 mx-auto mb-6 relative">
             <div className={`w-full h-full rounded-full flex items-center justify-center text-4xl ${
@@ -138,7 +139,7 @@ export default function Result({ questions, answers, onRestart }) {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => setShowDetails(!showDetails)}
+              onClick={toggleDetails}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,18 +148,10 @@ export default function Result({ questions, answers, onRestart }) {
               {showDetails ? 'Hide' : 'View'} Detailed Results
             </button>
             
-            <button
-              onClick={downloadResults}
-              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center justify-center"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Download Results
-            </button>
+
             
             <button
-              onClick={handleRestart}
+              onClick={() => window.location.reload()}
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,8 +163,13 @@ export default function Result({ questions, answers, onRestart }) {
         </div>
 
         {/* Detailed Results */}
-        {showDetails && (
-          <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+        <div 
+          ref={detailsRef}
+          className={`transition-all duration-500 ease-in-out overflow-hidden ${
+            showDetails ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mt-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Detailed Review</h2>
             <div className="space-y-4">
               {questions.map((question, index) => {
@@ -212,20 +210,11 @@ export default function Result({ questions, answers, onRestart }) {
               })}
             </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showConfirm}
-        onClose={() => setShowConfirm(false)}
-        onConfirm={confirmRestart}
-        title="Start New Quiz?"
-        message="This will take you back to upload a new PDF. Your current results will be lost unless you download them first."
-        confirmText="Start New Quiz"
-        cancelText="Stay Here"
-        type="default"
-      />
+
     </div>
   );
 }
