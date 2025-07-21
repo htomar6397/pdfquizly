@@ -4,14 +4,16 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
  * Quiz Component
  * A fully accessible and robust quiz component with error handling and review functionality
  */
-const Quiz = ({ questions = [], onFinish, error = null, timeLimit = 30 }) => {
+const Quiz = ({ questions = [], onFinish, error = null }) => {
+  // Timer configuration
+  const TOTAL_QUIZ_TIME = 10 * 60; // 10 minutes in seconds
+
   // State management
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [flaggedQuestions, setFlaggedQuestions] = useState(new Set());
-  const [timeRemaining, setTimeRemaining] = useState(timeLimit * 60); // Convert minutes to seconds
+  const [timeRemaining, setTimeRemaining] = useState(TOTAL_QUIZ_TIME);
   const [isReviewMode, setIsReviewMode] = useState(false);
-  const [timerActive] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const timerRef = useRef(null);
   const mainContentRef = useRef(null);
@@ -66,10 +68,9 @@ const Quiz = ({ questions = [], onFinish, error = null, timeLimit = 30 }) => {
     setAnswers(new Array(validatedQuestions.length).fill(null));
   }, [validatedQuestions]);
 
-  // Timer effect
+  // Timer effect - 10 minute countdown for entire quiz
   useEffect(() => {
-    if (!timeLimit || !timerActive) return;
-
+    // Start the countdown timer
     timerRef.current = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
@@ -81,8 +82,9 @@ const Quiz = ({ questions = [], onFinish, error = null, timeLimit = 30 }) => {
       });
     }, 1000);
 
+    // Clean up the interval when component unmounts
     return () => clearInterval(timerRef.current);
-  }, [timeLimit, timerActive, handleSubmit]);
+  }, [handleSubmit]);
 
   // Focus management for accessibility
   useEffect(() => {
@@ -134,10 +136,10 @@ const Quiz = ({ questions = [], onFinish, error = null, timeLimit = 30 }) => {
 
 
   // Utility functions
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const formatTime = (totalSeconds) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
   // Calculate progress percentage
@@ -215,12 +217,10 @@ const Quiz = ({ questions = [], onFinish, error = null, timeLimit = 30 }) => {
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-bold text-gray-900">Quiz</h1>
             <div className="flex items-center space-x-4">
-              {timeLimit > 0 && (
-                <div className="flex items-center text-sm font-medium text-gray-700">
-                  <span className="mr-1">⏱️</span>
-                  <span>{formatTime(timeRemaining)}</span>
-                </div>
-              )}
+              <div className="flex items-center text-sm font-medium text-gray-700">
+                <span className="mr-1">⏱️</span>
+                <span>{formatTime(timeRemaining)}</span>
+              </div>
               <button
                 onClick={() => setIsReviewMode(true)}
                 className="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors"
@@ -308,21 +308,26 @@ const Quiz = ({ questions = [], onFinish, error = null, timeLimit = 30 }) => {
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             {/* Question header */}
             <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-500">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">
                   Question {currentQuestionIndex + 1} of {validatedQuestions.length}
-                </span>
-                <button
-                  onClick={toggleFlagQuestion}
-                  className={`text-sm font-medium flex items-center ${
-                    flaggedQuestions.has(currentQuestionIndex)
-                      ? 'text-yellow-600 hover:text-yellow-700'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                  aria-label={flaggedQuestions.has(currentQuestionIndex) ? 'Unflag this question' : 'Flag this question for review'}
-                >
-                  {flaggedQuestions.has(currentQuestionIndex) ? '⭐' : '☆'} Flag
-                </button>
+                </h2>
+                <div className="flex items-center gap-4">
+                  <div className="text-lg font-medium">
+                    Time Left: {formatTime(timeRemaining)}
+                  </div>
+                  <button
+                    onClick={toggleFlagQuestion}
+                    className={`text-sm font-medium flex items-center ${
+                      flaggedQuestions.has(currentQuestionIndex)
+                        ? 'text-yellow-600 hover:text-yellow-700'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                    aria-label={flaggedQuestions.has(currentQuestionIndex) ? 'Unflag this question' : 'Flag this question for review'}
+                  >
+                    {flaggedQuestions.has(currentQuestionIndex) ? '⭐' : '☆'} Flag
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -412,14 +417,7 @@ const Quiz = ({ questions = [], onFinish, error = null, timeLimit = 30 }) => {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-8">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} Quiz Platform. All rights reserved.
-          </p>
-        </div>
-      </footer>
+     
     </div>
   );
 };

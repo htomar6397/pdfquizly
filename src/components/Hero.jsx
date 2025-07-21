@@ -38,59 +38,37 @@ export default function Hero({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             
             {/* Difficulty Level */}
-            {/* Enhanced Difficulty Dropdown */}
-            <div className="relative group">
-              <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors duration-200 group-hover:text-blue-600">
-                Difficulty Level
+            {/* Simplified Difficulty Dropdown */}
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Difficulty
               </label>
-              <div className="relative">
-                <select
-                  value={difficulty}
-                  onChange={(e) => setDifficulty(e.target.value)}
-                  className="w-full px-4 py-2.5 pr-10 rounded-lg border border-gray-300 bg-white text-gray-700 
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ring-offset-1
-                    transition-all duration-200 appearance-none cursor-pointer
-                    hover:border-blue-300 hover:shadow-sm"
-                >
-                  <option value="Easy">Easy</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Hard">Hard</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-b from-transparent to-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"></div>
-              </div>
+              <select
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
             </div>
             
-            {/* Enhanced Questions Dropdown */}
-            <div className="relative group">
-              <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors duration-200 group-hover:text-blue-600">
+            {/* Simplified Questions Dropdown */}
+            <div className="w-full">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Questions
               </label>
-              <div className="relative">
-                <select
-                  value={numQuestions}
-                  onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-                  className="w-full px-4 py-2.5 pr-10 rounded-lg border border-gray-300 bg-white text-gray-700 
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ring-offset-1
-                    transition-all duration-200 appearance-none cursor-pointer
-                    hover:border-blue-300 hover:shadow-sm"
-                >
-                  <option value={5}>5 Questions</option>
-                  <option value={10}>10 Questions</option>
-                  <option value={15}>15 Questions</option>
-                  <option value={20}>20 Questions</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-b from-transparent to-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"></div>
-              </div>
+              <select
+                value={numQuestions}
+                onChange={(e) => setNumQuestions(parseInt(e.target.value))}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value={5}>5 Questions</option>
+                <option value={10}>10 Questions</option>
+                <option value={15}>15 Questions</option>
+                <option value={20}>20 Questions</option>
+              </select>
             </div>
             
             {/* Upload Button */}

@@ -2,13 +2,18 @@ import React from 'react';
 
 export default function Navbar({ onShowHistory, currentView }) {
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-b border-gray-200 z-50">
+    <nav className="fixed top-0 left-0 right-0 bg-gray-90 backdrop-blur-sm border-b border-gray-200 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900"><img src="../public/logo.svg" alt="Logo" className="w-12 h-12" /> PdfQuizly</h1>
-            </div>
+        <div className="flex items-center space-x-3">
+            <img
+              src="/logo.svg"
+              alt="PdfQuizly Logo"
+              className="w-10 h-10"
+            />
+            <h1 className="text-2xl font-bold text-gray-900">
+              PdfQuizly
+            </h1>
           </div>
           
           <div className="hidden md:block">

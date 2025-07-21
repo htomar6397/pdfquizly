@@ -345,17 +345,23 @@ export default function App() {
     }
   };
 
+  // Determine if we're on a quiz-related page
+  const isQuizPage = step === 'quiz' || step === 'result';
+  const mainClasses = `flex-grow ${!isQuizPage ? 'mt-16' : ''}`;
+
   return (
     <ErrorBoundary>
       <div className="min-h-screen flex flex-col">
-        <Navbar 
-          currentView={currentView}
-          onShowHistory={handleViewChange}
-        />
-        <main className="flex-grow mt-16">
+        {!isQuizPage && (
+          <Navbar 
+            currentView={currentView}
+            onShowHistory={handleViewChange}
+          />
+        )}
+        <main className={mainClasses}>
           {renderView()}
         </main>
-        <Footer />
+        {!isQuizPage && <Footer />}
         <div className="fixed bottom-4 right-4 space-y-2 z-50">
           {toasts.map(toast => (
             <Toast 
